@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}About - Duplicate File Detector{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-info-circle me-3 text-primary"></i>
+                About
+            </h1>
+            <p class="lead text-muted">
+                Learn more about the Duplicate File Detector and how it works.
+            </p>
+        </div>
+
+        <!-- Main Information -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog me-2"></i>
+                    How It Works
+                </h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    The Duplicate File Detector uses advanced algorithms to identify duplicate files 
+                    on your system with high accuracy and efficiency.
+                </p>
+                
+                <h6 class="mt-4">Key Features:</h6>
+                <ul>
+                    <li><strong>SHA-256 Hashing:</strong> Uses cryptographic hashing to identify duplicates by content, not just filename</li>
+                    <li><strong>Recursive Scanning:</strong> Scans all subdirectories automatically</li>
+                    <li><strong>Safe Operation:</strong> Read-only scanning with no modifications to your files</li>
+                    <li><strong>Detailed Reports:</strong> Comprehensive analysis with statistics and recommendations</li>
+                    <li><strong>Web Interface:</strong> Easy-to-use web-based interface</li>
+                </ul>
+
+                <h6 class="mt-4">Process:</h6>
+                <ol>
+                    <li>Select a directory to scan</li>
+                    <li>The system recursively walks through all files and subdirectories</li>
+                    <li>Each file is analyzed and a SHA-256 hash is calculated</li>
+                    <li>Files with identical hashes are identified as duplicates</li>
+                    <li>Results are organized into groups and presented with detailed statistics</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Technical Specifications -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-code me-2"></i>
+                    Technical Specifications
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Backend Technology:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fab fa-python me-2 text-primary"></i>Python 3.8+</li>
+                            <li><i class="fas fa-flask me-2 text-primary"></i>Flask Web Framework</li>
+                            <li><i class="fas fa-lock me-2 text-primary"></i>SHA-256 Cryptographic Hashing</li>
+                            <li><i class="fas fa-cogs me-2 text-primary"></i>Environment-based Configuration</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Frontend Technology:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fab fa-html5 me-2 text-danger"></i>HTML5</li>
+                            <li><i class="fab fa-css3-alt me-2 text-primary"></i>CSS3 with Bootstrap 5</li>
+                            <li><i class="fab fa-js me-2 text-warning"></i>JavaScript</li>
+                            <li><i class="fas fa-mobile-alt me-2 text-success"></i>Responsive Design</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance & Limitations -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Performance & Limitations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Performance:</h6>
+                        <ul>
+                            <li>Processes files in 8KB chunks for memory efficiency</li>
+                            <li>Optimized for large directories with thousands of files</li>
+                            <li>Progress tracking and error handling</li>
+                            <li>Configurable timeout and worker limits</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Current Limitations:</h6>
+                        <ul>
+                            <li>Maximum file size: 100MB (configurable)</li>
+                            <li>Web-based interface requires manual path entry</li>
+                            <li>Single-threaded processing</li>
+                            <li>No automatic file deletion (safety feature)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Safety & Privacy -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Safety & Privacy
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Data Safety:</h6>
+                <ul>
+                    <li><strong>Read-Only Operations:</strong> The application only reads files, never modifies or deletes them</li>
+                    <li><strong>No Data Storage:</strong> File contents are not stored, only hash values for comparison</li>
+                    <li><strong>Local Processing:</strong> All processing happens locally on your machine</li>
+                    <li><strong>No Network Transfer:</strong> Your files never leave your computer</li>
+                </ul>
+
+                <h6 class="mt-4">Privacy:</h6>
+                <ul>
+                    <li>No telemetry or data collection</li>
+                    <li>No external network connections during scanning</li>
+                    <li>All processing is performed locally</li>
+                    <li>File paths and names are only displayed in your browser</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Usage Tips -->
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Usage Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Best Practices:</h6>
+                <ul>
+                    <li>Start with smaller directories to test functionality</li>
+                    <li>Always backup important files before making any deletions</li>
+                    <li>Review duplicate groups carefully - the "original" file is determined by modification date</li>
+                    <li>Export results to JSON for record-keeping</li>
+                    <li>Use the detailed statistics to understand your file organization</li>
+                </ul>
+
+                <h6 class="mt-4">Common Use Cases:</h6>
+                <ul>
+                    <li>Cleaning up Downloads folders</li>
+                    <li>Organizing photo collections</li>
+                    <li>Managing document archives</li>
+                    <li>Freeing up disk space</li>
+                    <li>Identifying backup redundancies</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

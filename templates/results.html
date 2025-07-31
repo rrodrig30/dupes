@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Results - Duplicate File Detector{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="mb-1">
+                    <i class="fas fa-chart-pie me-2 text-primary"></i>
+                    Scan Results
+                </h2>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-folder me-1"></i>
+                    {{ directory }}
+                </p>
+            </div>
+            <div>
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-search me-2"></i>
+                    New Scan
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-files fa-2x mb-2"></i>
+                        <h3 class="mb-1">{{ report.summary.total_files }}</h3>
+                        <small>Total Files</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-copy fa-2x mb-2"></i>
+                        <h3 class="mb-1">{{ report.summary.duplicate_groups }}</h3>
+                        <small>Duplicate Groups</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-trash fa-2x mb-2"></i>
+                        <h3 class="mb-1">{{ report.summary.duplicate_files }}</h3>
+                        <small>Duplicate Files</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stats-card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-hdd fa-2x mb-2"></i>
+                        <h3 class="mb-1">{{ report.summary.space_wasted | filesize }}</h3>
+                        <small>Space Wasted</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Errors Section (if any) -->
+        {% if errors %}
+        <div class="alert alert-warning">
+            <h6><i class="fas fa-exclamation-triangle me-2"></i>Processing Warnings</h6>
+            <ul class="mb-0">
+                {% for error in errors[:5] %}
+                <li>{{ error }}</li>
+                {% endfor %}
+                {% if errors|length > 5 %}
+                <li><em>... and {{ errors|length - 5 }} more warnings</em></li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- No Duplicates Found -->
+        {% if report.summary.duplicate_groups == 0 %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h3>No Duplicates Found!</h3>
+                <p class="text-muted">
+                    Great news! No duplicate files were found in the scanned directory.
+                    Your files are already well-organized.
+                </p>
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>
+                    Scan Another Directory
+                </a>
+            </div>
+        </div>
+        {% else %}
+
+        <!-- Duplicate Groups -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-layer-group me-2"></i>
+                    Duplicate File Groups
+                    <span class="badge bg-danger ms-2">{{ report.duplicate_groups|length }}</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% for group in report.duplicate_groups %}
+                <div class="duplicate-group border rounded m-3">
+                    <div class="bg-light p-3 border-bottom">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h6 class="mb-1">
+                                    <i class="fas fa-layer-group me-2 text-danger"></i>
+                                    Group {{ loop.index }} - {{ group.file_count }} files
+                                </h6>
+                                <small class="text-muted">
+                                    <strong>Hash:</strong> {{ group.hash[:16] }}...
+                                    <span class="ms-3"><strong>Size per file:</strong> {{ group.file_size | filesize }}</span>
+                                </small>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <div class="badge bg-danger fs-6">
+                                    {{ group.wasted_space | filesize }} wasted
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Files in this group -->
+                    <div class="list-group list-group-flush">
+                        {% for file in group.files %}
+                        <div class="list-group-item file-item {{ 'original-file' if file.is_original else 'duplicate-file' }}" data-file-path="{{ file.path }}">
+                            <div class="row align-items-center">
+                                <div class="col-md-1 text-center">
+                                    {% if file.is_original %}
+                                    <i class="fas fa-star text-success" title="Original (oldest)"></i>
+                                    {% else %}
+                                    <i class="fas fa-copy text-danger" title="Duplicate"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="fw-bold">{{ file.name }}</div>
+                                    <small class="text-muted">
+                                        <i class="fas fa-folder me-1"></i>
+                                        {{ file.path }}
+                                    </small>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="small">
+                                        <div><strong>{{ file.size | filesize }}</strong></div>
+                                        <div class="text-muted">{{ file.modified[:19] }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    {% if not file.is_original %}
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            onclick="deleteFile('{{ file.path }}', '{{ file.name }}')"
+                                            title="Delete this duplicate file">
+                                        <i class="fas fa-trash me-1"></i>
+                                        Delete
+                                    </button>
+                                    {% else %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-shield-alt me-1"></i>
+                                        Keep
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6>Delete All Duplicates</h6>
+                        <p class="text-muted small">Delete all duplicate files (keeps originals)</p>
+                        <button class="btn btn-outline-danger" onclick="deleteAllDuplicates()" id="deleteAllBtn">
+                            <i class="fas fa-trash-alt me-2"></i>
+                            Delete Duplicates
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6>Export Results</h6>
+                        <p class="text-muted small">Save the scan results for later review</p>
+                        <button class="btn btn-outline-primary" onclick="exportResults()">
+                            <i class="fas fa-download me-2"></i>
+                            Export JSON
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h6>View Summary</h6>
+                        <p class="text-muted small">See detailed statistics and recommendations</p>
+                        <button class="btn btn-outline-info" onclick="showSummaryModal()">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            View Summary
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Summary Modal -->
+<div class="modal fade" id="summaryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Detailed Summary
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Scan Statistics</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Total Files Scanned:</td>
+                                <td><strong>{{ report.summary.total_files }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Duplicate Groups Found:</td>
+                                <td><strong>{{ report.summary.duplicate_groups }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Total Duplicate Files:</td>
+                                <td><strong>{{ report.summary.duplicate_files }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Wasted Storage Space:</td>
+                                <td><strong>{{ report.summary.space_wasted | filesize }}</strong></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Recommendations</h6>
+                        {% if report.summary.duplicate_files > 0 %}
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Review duplicate groups carefully</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Keep the original (starred) files</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Consider backing up before deletion</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Free up {{ report.summary.space_wasted | filesize }} of space</li>
+                        </ul>
+                        {% else %}
+                        <p class="text-muted">No duplicates found - your directory is well-organized!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function exportResults() {
+    const results = {{ report | tojson }};
+    const dataStr = JSON.stringify(results, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = 'duplicate_scan_results_' + new Date().toISOString().slice(0, 19).replace(/:/g, '-') + '.json';
+    link.click();
+}
+
+function showSummaryModal() {
+    const modal = new bootstrap.Modal(document.getElementById('summaryModal'));
+    modal.show();
+}
+
+function deleteAllDuplicates() {
+    // Collect all duplicate file paths (excluding originals)
+    const duplicateFilePaths = [];
+    document.querySelectorAll('[data-file-path]').forEach(element => {
+        const filePath = element.getAttribute('data-file-path');
+        const isOriginal = element.querySelector('.fa-star');
+        
+        if (!isOriginal && filePath) {
+            duplicateFilePaths.push(filePath);
+        }
+    });
+    
+    if (duplicateFilePaths.length === 0) {
+        alert('No duplicate files found to delete.');
+        return;
+    }
+    
+    // Use the global bulk delete function
+    deleteBulkDuplicates(duplicateFilePaths);
+}
+
+// Override the updateDisplayStatistics function for this page
+function updateDisplayStatistics() {
+    // Count remaining duplicates
+    const remainingDuplicates = document.querySelectorAll('[data-file-path]').length;
+    const duplicateGroups = document.querySelectorAll('.duplicate-group').length;
+    
+    // Update the statistics cards if they exist
+    const statsCards = document.querySelectorAll('.stats-card h3');
+    if (statsCards.length >= 2) {
+        // Update duplicate files count (this is approximate)
+        let visibleDuplicates = 0;
+        document.querySelectorAll('.duplicate-group').forEach(group => {
+            const fileItems = group.querySelectorAll('[data-file-path]');
+            if (fileItems.length > 1) {
+                visibleDuplicates += fileItems.length - 1; // Subtract 1 for the original
+            }
+        });
+        
+        if (statsCards[2]) statsCards[2].textContent = visibleDuplicates;
+    }
+    
+    // Hide the delete all button if no duplicates remain
+    const deleteAllBtn = document.getElementById('deleteAllBtn');
+    if (deleteAllBtn) {
+        const remainingDupeFiles = document.querySelectorAll('[data-file-path] .fa-copy').length;
+        if (remainingDupeFiles === 0) {
+            deleteAllBtn.disabled = true;
+            deleteAllBtn.innerHTML = '<i class="fas fa-check me-2"></i>All Cleaned';
+            deleteAllBtn.classList.remove('btn-outline-danger');
+            deleteAllBtn.classList.add('btn-success');
+        }
+    }
+    
+    console.log(`Statistics updated: ${remainingDuplicates} files remaining`);
+}
+
+// Auto-scroll to results if there are duplicates
+{% if report.summary.duplicate_groups > 0 %}
+window.addEventListener('load', function() {
+    const firstGroup = document.querySelector('.duplicate-group');
+    if (firstGroup) {
+        firstGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+});
+{% endif %}
+</script>
+{% endblock %}
